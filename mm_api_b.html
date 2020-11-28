@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>MM2API</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/simple.css" id="theme">
+		<link rel="stylesheet" href="dist/custom.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <br/>
+               <p style="text-align: left; font-size: 34px;">
+               Move through this tutorial using the arrow keys.<br/> 
+               </p>
+               <p style="text-align: left; font-size: 34px; color: grey">
+               Code is in grey color.<br/>
+               </p>
+               <p style="text-align: left; font-size: 34px;">
+               Try to write the requested lines or scripts yourself, before looking at one of the many possible solutions.  Use the web resources to find the appropriate functions.  If you can not easily figure things out, do not hesitate to look at the answer, and use the example given to make your code work.
+               </p>
+            </section>
+
+				<section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p style="text-align: left; font-size: 26px;">
+               The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/Studio.html">Micro-Manager object</a> (usually named "mm”, but sometimes called “studio”) is organized in various “managers”, such as the “AcquisitionManager”, and “SnapLiveManager”, that contain functions executing most of the things users normally do with Micro-Manager.  Let’s start with the 
+               <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/SnapLiveManager.html">SnapLiveManager</a> that you can obtain using “mm.live()”.
+               </p>
+               <p style="text-align: left; font-size: 26px;">
+               Use the REPL to Snap and Display an image in a single line of code:
+               </p>
+               <p  class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+               images = mm.live().snap(true);
+               </p>
+               <div class="fragment">
+               <p style="text-align: left; font-size: 26px;">
+Note that this call returns a list of type “Image”. <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/Image.html">Image</a> is a datastructure that holds the actual pixel data, but also metadata such as width and height, bytes per pixel, microscope metadata, and  “Coords”.  <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/Coords.html">Coords</a> specify the position in a multi-dimensional acquisition where the image belongs.  Coords need to be created with a “builder”.  You can obtain a builder using: 
+               </p>
+               <p style="text-align: left; font-size: 26px; color: grey">
+                  import org.micromanager.data.Coordinates;<br/>
+                  cb = Coordinates.builder();
+               </p>
+
+               <p style="text-align: left; font-size: 26px;">
+You do need to set all axes of the Coordinates builder, or strange bugs will slip in.  Build a Coords with the channel set to position 2, time to 1, z, and position to 0:
+               </p>
+
+               <p  class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+coord = cb.c(2).t(1).z(0).p(0).build();
+               </p>
+               </div>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p style="text-align: left; font-size: 26px;">
+               <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/Datastore.html">Datastore</a> objects can be thought of as collections of images.
+               They can store images in RAM or on disk (in multiple formats).  The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/DataManager.html">DataManager</a> can create Datastores, for instance: 
+               <p style="text-align: left; font-size: 26px; color: grey">
+               store = mm.data().createRAMDatastore();
+               <p style="text-align: left; font-size: 26px;">
+               To open a viewer displaying the data in your store, use: 
+               </p>
+               <p style="text-align: left; font-size: 26px; color: grey">
+               viewer = mm.displays().createDisplay(store);
+               </p>
+               <p style="text-align: left; font-size: 26px;">
+               Now write a script that snaps two images without displaying them, inserts them into a datastore, and displays the datastore.
+               </p>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p style="text-align: left;">
+               One way to do this:
+               </p>
+
+               <p style="text-align: left; font-size: 26px; color: grey;">
+               <pre style="color:grey">
+import org.micromanager.data.Coordinates;
+
+store = mm.data().createRAMDatastore();
+display = mm.displays().createDisplay(store);
+cb = Coordinates.builder();
+cb.c(0).t(0).p(0).z(0);
+
+for (c = 0; c < 2; c++) {
+   images = mm.live().snap(false);
+   img = images.get(0);
+   cImg = img.copyAtCoords(cb.c(c).build());
+   store.putImage(cImg);
+}
+</pre>
+               </p>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>User feedback</p>
+               <p style="text-align: left; font-size: 26px;">
+               The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/LogManager.html">LogManager</a> (get it using: mm.logs()) interacts with the logging system of Micro-Manager.  Logs can be found in the "CoreLogs" directory within the Micro-Manager application directory.  The LogManager can also be used to show messages to the user. Use the REPL to display a message in the GUI:
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+               mm.logs().showMessage("Hello");
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px;">
+               Use the REPL to log an error, and check the logs to see if it is there:
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+               mm.logs().logError("This is not really an error");
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px;">
+               Use the ScriptManager to print a message to the REPL:
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+               mm.scripter.message("Insert interesting message here");
+               </p>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Dealing with image sequences</p>
+               <p style="text-align: left; font-size: 26px;">
+               </p>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Using image analysis (ImageJ</p>
+               <p style="text-align: left; font-size: 26px;">
+               Pixels can be accessed through the <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/Image.html">Image</a> object, and used in any image processing/analysis code that is on the classpath.  <a href="https://imagej.nih.gov/ij/developer/api/index.html">ImageJ</a> is one such library that is readily available (others are <a href="https://javadoc.scijava.org/ImgLib2/">imglib2</a> and <a href="https://boofcv.org/javadoc/index.html">boofCV</a>.  Convenience functions to convert between Micro-Manager and ImageJ data structures are provided in <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/ImageJConverter.html">ImageJConverter</a>, accessible through mm.data().ij().
+               </p>
+               <p style="text-align: left; font-size: 26px;">
+               Write a short script that snaps an image without display it, gets an ImageJ ImageProcessor from that image, uses the Imagej function "findEdges()" to find edges, converts it back into a Micro-Manager Image, and displays it using mm.live().
+               </p>
+               <pre class="fragment">
+images = mm.live().snap(false);
+img = images.get(0);
+ip = mm.data().ij().createProcessor(img);
+ip.findEdges();
+newImg = mm.data().ij().createImage(ip, img.getCoords(), null);
+mm.live().displayImage(newImg);
+               </pre>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Acquisitions</p>
+               <p style="text-align: left; font-size: 26px;">
+               </p>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+            transition: 'none',
+                     center: false,
+                     width: 1280,
+                     height: 720,
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+
+         Reveal.configure({
+           keyboard: {
+             86: function vidplay() {
+               var vids = document.getElementsByTagName("video");
+               var i;
+               for (i=0; i<vids.length; i++) {
+                  var video = vids.item(i);
+                  if (video.paused == true) video.play();
+                  else video.pause();
+               }
+             }
+           }
+         });
+		</script>
+	</body>
+</html>
