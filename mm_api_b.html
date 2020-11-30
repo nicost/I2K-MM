@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="dist/custom.css">
 
 		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+		<link rel="stylesheet" href="plugin/highlight/a11y-light.css" id="highlight-theme">
 	</head>
 	<body>
 		<div class="reveal">
@@ -87,7 +87,6 @@ coord = cb.c(2).t(1).z(0).p(0).build();
                One way to do this:
                </p>
 
-               <p style="text-align: left; font-size: 26px; color: grey;">
                <pre style="color:grey">
 import org.micromanager.data.Coordinates;
 
@@ -103,7 +102,6 @@ for (c = 0; c < 2; c++) {
    store.putImage(cImg);
 }
 </pre>
-               </p>
             </section>
 
             <section>
@@ -133,7 +131,12 @@ for (c = 0; c < 2; c++) {
                <h3>Micro-Manager 2.0 (Java) API</h3>
                <p>Position List</p>
                <p style="text-align: left; font-size: 26px;">
+               The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/PositionListManager.html">PositionListManager</a> gives access to the Stage Position List Dialog content.  A <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/PositionList.html">PositionList</a> contains instances of <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/MultiStagePosition.html">MultiStagePosition</a>. You can use the static function <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/MultiStagePosition.html#goToPosition-org.micromanager.MultiStagePosition-mmcorej.CMMCore-">MultiStagePosition.goToPosition</a> to move the stage(s) to a desired postion. Add a few positions to the Stage Position List in the GUI (use the Stage Control to move to different positions), then write a script to move the stage to the second position in the list:
                </p>
+               <pre class="fragment" style="color:grey">
+pl = mm.positions().getPositionList();
+msp = pl.getPosition(1);
+msp.goToPosition(msp, mmc);</pre>
             </section>
 
             <section>
@@ -285,6 +288,7 @@ mm.acquisitions().attachRunnable(-1, 0, -1, 0, runnable);</pre>
 		<script src="plugin/notes/notes.js"></script>
 		<script src="plugin/markdown/markdown.js"></script>
 		<script src="plugin/highlight/highlight.js"></script>
+		<script src="plugin/highlight/highlightjs-badge.min.js"></script>
 		<script>
 			// More info about initialization & config:
 			// - https://revealjs.com/initialization/
