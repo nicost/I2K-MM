@@ -131,7 +131,7 @@ for (c = 0; c < 2; c++) {
 
             <section>
                <h3>Micro-Manager 2.0 (Java) API</h3>
-               <p>Dealing with image sequences</p>
+               <p>Position List</p>
                <p style="text-align: left; font-size: 26px;">
                </p>
             </section>
@@ -143,23 +143,141 @@ for (c = 0; c < 2; c++) {
                Pixels can be accessed through the <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/Image.html">Image</a> object, and used in any image processing/analysis code that is on the classpath.  <a href="https://imagej.nih.gov/ij/developer/api/index.html">ImageJ</a> is one such library that is readily available (others are <a href="https://javadoc.scijava.org/ImgLib2/">imglib2</a> and <a href="https://boofcv.org/javadoc/index.html">boofCV</a>.  Convenience functions to convert between Micro-Manager and ImageJ data structures are provided in <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/data/ImageJConverter.html">ImageJConverter</a>, accessible through mm.data().ij().
                </p>
                <p style="text-align: left; font-size: 26px;">
-               Write a short script that snaps an image without display it, gets an ImageJ ImageProcessor from that image, uses the Imagej function "findEdges()" to find edges, converts it back into a Micro-Manager Image, and displays it using mm.live().
+               Write a short script that snaps an image without displaying it, gets an ImageJ ImageProcessor from that image, uses the Imagej function "findEdges()" to find edges, converts it back into a Micro-Manager Image, and displays it using mm.live():
                </p>
-               <pre class="fragment">
+               <pre class="fragment" style="color: grey;">
 images = mm.live().snap(false);
 img = images.get(0);
 ip = mm.data().ij().createProcessor(img);
 ip.findEdges();
 newImg = mm.data().ij().createImage(ip, img.getCoords(), null);
-mm.live().displayImage(newImg);
-               </pre>
+mm.live().displayImage(newImg);</pre>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Dealing with image sequences</p>
+               <p style="text-align: left; font-size: 26px;">
+               Often, streaming the camera is the fastest way to acquire images.  Combined with hardware synchronization, very fast multi-D acquisitions are possible.  Some special coding strategies are needed to acquire images from an image sequence.  Write a script that starts a sequence of 10 images, and puts them as a time series into a data store:</p>
+               <pre class="fragment" style="color: grey">
+cb = mm.data().getCoordsBuilder().z(0).c(0).p(0).t(0);
+store = mm.data().createRAMDatastore();
+display = mm.displays().createDisplay(store);
+mmc.startSequenceAcquisition(10, 0, true);
+int curFrame = 0;
+while (mmc.getRemainingImageCount() > 0 || mmc.isSequenceRunning(mmc.getCameraDevice())) {
+   if (mmc.getRemainingImageCount() > 0) {
+      tagged = mmc.popNextTaggedImage();
+      // Convert to an Image at the desired time point
+      image = mm.data().convertTaggedImage(tagged, cb.time(curFrame).build(), null);
+      store.putImage(image);
+      curFrame++;
+   }
+   else { mmc.sleep(5); }
+}</pre>
+
+               </p>
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Dealing with image sequences(2)</p>
+               <p style="text-align: left; font-size: 26px;">
+               Now run a sequence of 10 images, and put the odd numbered images into channel 0, and the even numbered ones in channel 1 (resulting in 5 time points total):
+					</p>
+               <pre class="fragment" style="color: grey;">
+cb = mm.data().getCoordsBuilder().z(0).c(0).p(0).t(0);
+store = mm.data().createRAMDatastore();
+display = mm.displays().createDisplay(store);
+mmc.startSequenceAcquisition(10, 0, true);
+int curFrame = 0;
+while (mmc.getRemainingImageCount() > 0 || mmc.isSequenceRunning(mmc.getCameraDevice())) {
+   if (mmc.getRemainingImageCount() > 0) {
+      tagged = mmc.popNextTaggedImage();
+      // Convert to an Image at the desired channel.
+      image = mm.data().convertTaggedImage(tagged, 
+                 cb.t(curFrame / 2).c(curFrame % 2).build(), null);
+      store.putImage(image);
+      curFrame++;
+   }
+   else { mmc.sleep(5); }
+}
+					</pre>
+				</section>
+
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Acquisitions</p>
+               <p style="text-align: left; font-size: 26px;">
+The Micro-Manager acquisition engine translates instructions such as those provided through the MDA window into instructions to the hardware, and puts the resulting images into a datastore. You get access to the Acquisition Engine through the <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/acquisition/AcquisitionManager.html">AcquisitionManager</a>. Write a one liner to run an acquisition with the  current settings in the MDA dialog:</p>
+               </p>
+               <p class="fragment" style="text-align: left; font-size: 26px; color: grey;">
+               mm.acquisitions().runAcquistion();<br>
+               // or<br>
+               mm.acquisitions().runAcquisitionNonBlocking();
+               </p>
+               <div class="fragment">
+                  <p style="text-align: left; font-size: 26px;">
+                  Acquisition Settings are contained in the <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/acquisition/SequenceSettings.html">SequenceSettings</a> class.  Although these can be changed directly, the preferred (and in the future, only) way to do so is through a "Builder", which you can obtain with: </p>
+                  <pre style="color: grey;">
+import org.micromanager.acquisition.SequenceSettings;
+
+sequenceSettings = mm.acquisitions().getAcquisitionSettings();
+sb = SequenceSettings.Builder(sequenceSettings);</pre>
+               </div>
             </section>
 
             <section>
                <h3>Micro-Manager 2.0 (Java) API</h3>
                <p>Acquisitions</p>
                <p style="text-align: left; font-size: 26px;">
-               </p>
+               Write a short script that updates the comments in the MDA dialog:
+               <pre class="fragment" style="color: grey;">
+import org.micromanager.acquisition.SequenceSettings;
+sequenceSettings = mm.acquisitions().getAcquisitionSettings();
+sb = new SequenceSettings.Builder(sequenceSettings);
+
+sb.comment("Where is the Red Necked Phalarope?");
+mm.acquisitions().setAcquisitionSettings(sb.build());</pre>
+               <div class="fragment">
+               <p style="text-align: left; font-size: 26px;">
+               A very powerful feature is the addition of "Runnables" to an acquisition.  Using the function "attachRunnable()", you can add a Runnable, and specify when (i.e. before which specific image(s) in the acquisition the Runnable should run.  Runnables are a concept from the Java world, specifying a piece of code that will "run" when it is called.  In Beanshell, you can create a Runnable with the following code:</p>
+               <pre style="color: grey;">
+runnable = new Runnable() {
+   public void run() {
+      // do stuff here
+   }
+}</pre>
+               </div>
+
+            </section>
+
+            <section>
+               <h3>Micro-Manager 2.0 (Java) API</h3>
+               <p>Acquisitions</p>
+               <p style="text-align: left; font-size: 26px;">
+               Write a script that attaches a Runnable to the acquisition.  Imagine a non-motorized microscope, and you want to prompt the user to put a new filter cube in place whenever a new channel is imaged:
+               <pre class="fragment" style="color: grey;">
+mm.acquisitions().clearRunnables();
+
+runnable = new Runnable() {
+   int count = 0;
+   public void run() {
+      settings = mm.acquisitions().getAcquisitionSettings();
+      channels = settings.channels;
+      channel = channels.get(count);	
+      mm.logs().showMessage("Move filters for channel " + channel.config + " in place");
+      ++count;
+      if (count >= channels.size()) {
+         count = 0;
+      }
+   }
+};
+
+mm.acquisitions().attachRunnable(-1, 0, -1, 0, runnable);</pre>
+              
+            </section>
 			</div>
 		</div>
 
