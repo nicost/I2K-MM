@@ -261,7 +261,9 @@ runnable = new Runnable() {
                <p>Acquisitions</p>
                <p style="text-align: left; font-size: 26px;">
                Write a script that attaches a Runnable to the acquisition.  Imagine a non-motorized microscope, and you want to prompt the user to put a new filter cube in place whenever a new channel is imaged:
-               <pre class="fragment" style="color: grey;">
+               <div class="fragment">
+               <button class="btn" style="position: absolute; top: 200px; right: 30px;" data-clipboard-text="Checking"><img src=plugin/clipboard/assets/clippy.svg></button>
+               <pre id="runnable" value="test" style="color: grey;">
 mm.acquisitions().clearRunnables();
 
 runnable = new Runnable() {
@@ -279,6 +281,7 @@ runnable = new Runnable() {
 };
 
 mm.acquisitions().attachRunnable(-1, 0, -1, 0, runnable);</pre>
+               </div>
               
             </section>
 			</div>
@@ -288,7 +291,10 @@ mm.acquisitions().attachRunnable(-1, 0, -1, 0, runnable);</pre>
 		<script src="plugin/notes/notes.js"></script>
 		<script src="plugin/markdown/markdown.js"></script>
 		<script src="plugin/highlight/highlight.js"></script>
-		<script src="plugin/highlight/highlightjs-badge.min.js"></script>
+		<script src="plugin/clipboard/clipbboard.js"></script>
+      <script>
+         new ClipboardJS('.btn');
+      </script>
 		<script>
 			// More info about initialization & config:
 			// - https://revealjs.com/initialization/
