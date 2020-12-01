@@ -21,7 +21,7 @@
 				<section>
                <h3>Documentation</h3>
                <br/><br/>
-               <p style="text-align: left; font-size: 26px;">The Micro-Manager wiki has a <a href="https://micro-manager.org/wiki/Micro-Manager_Programming%20Guide">Programming Guide</a>, which contains a lot of useful information. In particular, the 2.0 Core API reference on the sidebar will be helpful in this tutorial. There are two versions of this, which contain the same information, but are built for different language bindings to the core (i.e. C++ or Java). Either one can work for this tutorial since they define the same functions. But one or the other might be easier to read depending on your programming background. The <a href="https://valelab4.ucsf.edu/~MM/doc/MMCore/html/class_c_m_m_core.html">C++ Core API Reference</a> has the nice feature that the functions are grouped according to their function. The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmcorej/mmcorej/CMMCore.html">Java Core API Reference </a>may have slightly more readable functions because the argument and return types are the ones you use in Beansheel, making it easier to figure out how to call a particular function. Refering to one (or both) of these will be useful throughout this tutorial.</p>
+               <p style="text-align: left; font-size: 26px;">The Micro-Manager wiki has a <a href="https://micro-manager.org/wiki/Micro-Manager_Programming%20Guide">Programming Guide</a>, which contains a lot of useful information. In particular, the 2.0 Core API reference on the sidebar will be helpful in this tutorial. There are two versions of this, which contain the same information, but are built for different language bindings to the core (i.e. C++ or Java). Either one can work for this tutorial since they define the same functions. But one or the other might be easier to read depending on your programming background. The <a href="https://valelab4.ucsf.edu/~MM/doc/MMCore/html/class_c_m_m_core.html">C++ Core API Reference</a> has the nice feature that the functions are grouped according to their function. The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmcorej/mmcorej/CMMCore.html">Java Core API Reference </a>may have slightly more readable functions because the argument and return types are the ones you use in Beanshell, making it easier to figure out how to call a particular function. Refering to one (or both) of these will be useful throughout this tutorial.</p>
             </section>
 
             <section>
@@ -84,7 +84,7 @@
                   <div>Figure out what position the XY stage is at, then move it to a position roughly 1000 µm away (be careful you dont smash an objective if youre on a real microscope)<br/><br/></div>
                   <div class="fragment" style="color: grey">
                      p = mmc.getXYStagePosition();<br/>
-                     mmc.setXYStagePosition(p.getX() + 1000.0; p.getY() + 200.0);<br/>
+                     mmc.setXYPosition(p.getX() + 1000.0, p.getY() + 200.0);
                      mm.app().refreshGUIFromCache();<br/>
 
                      </br/><br/>
