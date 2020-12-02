@@ -88,17 +88,22 @@ coord = cb.c(2).t(1).z(0).p(0).build();
                </p>
 
                <pre style="color:grey">
+// import needed to get the Coords builder               
 import org.micromanager.data.Coordinates;
 
 store = mm.data().createRAMDatastore();
 display = mm.displays().createDisplay(store);
+// create the Coords builder, and initialize all axes to zero
 cb = Coordinates.builder();
 cb.c(0).t(0).p(0).z(0);
 
 for (c = 0; c < 2; c++) {
+   // snap an image but do not display
    images = mm.live().snap(false);
    img = images.get(0);
+   // copy image with Coords specified by our builder
    cImg = img.copyAtCoords(cb.c(c).build());
+   // and place it in the store
    store.putImage(cImg);
 }
 </pre>
@@ -108,7 +113,7 @@ for (c = 0; c < 2; c++) {
                <h3>Micro-Manager 2.0 (Java) API</h3>
                <p>User feedback</p>
                <p style="text-align: left; font-size: 26px;">
-               The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/LogManager.html">LogManager</a> (get it using: mm.logs()) interacts with the logging system of Micro-Manager.  Logs can be found in the "CoreLogs" directory within the Micro-Manager application directory.  The LogManager can also be used to show messages to the user. Use the REPL to display a message in the GUI:
+               The <a href="https://valelab4.ucsf.edu/~MM/doc-2.0.0-gamma/mmstudio/org/micromanager/LogManager.html">LogManager</a> (get it using: mm.logs()) interacts with the logging system of Micro-Manager.  Logs can be found in the "CoreLogs" directory within the Micro-Manager application directory (for instance: C:\Program Files\Micro-Manager\Corelogs).  The LogManager can also be used to show messages to the user. Use the REPL to display a message in the GUI:
                </p>
                <p class="fragment" style="text-align: left; font-size: 26px; color: grey;">
                mm.logs().showMessage("Hello");
@@ -151,8 +156,10 @@ msp.goToPosition(msp, mmc);</pre>
                <pre class="fragment" style="color: grey;">
 images = mm.live().snap(false);
 img = images.get(0);
+// convert image into an ImageJ ImageProcessor 
 ip = mm.data().ij().createProcessor(img);
 ip.findEdges();
+// convert ImageProcessor back into a MM Image and display
 newImg = mm.data().ij().createImage(ip, img.getCoords(), null);
 mm.live().displayImage(newImg);</pre>
             </section>
@@ -227,7 +234,7 @@ The Micro-Manager acquisition engine translates instructions such as those provi
 import org.micromanager.acquisition.SequenceSettings;
 
 sequenceSettings = mm.acquisitions().getAcquisitionSettings();
-sb = SequenceSettings.Builder(sequenceSettings);</pre>
+sb = new SequenceSettings.Builder(sequenceSettings);</pre>
                </div>
             </section>
 
@@ -262,7 +269,6 @@ runnable = new Runnable() {
                <p style="text-align: left; font-size: 26px;">
                Write a script that attaches a Runnable to the acquisition.  Imagine a non-motorized microscope, and you want to prompt the user to put a new filter cube in place whenever a new channel is imaged:
                <div class="fragment">
-               <button class="btn" style="position: absolute; top: 200px; right: 30px;" data-clipboard-text="Checking"><img src=plugin/clipboard/assets/clippy.svg></button>
                <pre id="runnable" value="test" style="color: grey;">
 mm.acquisitions().clearRunnables();
 
@@ -282,7 +288,15 @@ runnable = new Runnable() {
 
 mm.acquisitions().attachRunnable(-1, 0, -1, 0, runnable);</pre>
                </div>
-              
+            </section>
+
+            <section>
+               <div style="position:absolute; left: 280px; top: 200px; font-size: 200px;">
+                  The End
+               </div>
+               <div style="position:absolute; right: 80px; top: 640px; font-size: 30px;">
+                  <a href="index.html">Overview</a>
+               </div>
             </section>
 			</div>
 		</div>
